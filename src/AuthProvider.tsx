@@ -4,7 +4,7 @@
  * Provides user authentication state and methods throughout the React app.
  */
 
-import React, {
+import {
   createContext,
   useContext,
   useState,
