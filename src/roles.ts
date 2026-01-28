@@ -85,6 +85,29 @@ export function isBusiness(user: User | null): boolean {
 }
 
 /**
+ * Check if a user is an approved business.
+ * Returns true only if user has business role AND status is 'approved'.
+ *
+ * @example
+ * ```ts
+ * if (isApprovedBusiness(user)) {
+ *   // Allow business-only actions
+ * }
+ * ```
+ */
+export function isApprovedBusiness(user: User | null): boolean {
+  return user?.business_status === 'approved';
+}
+
+/**
+ * Check if a user has the business role (regardless of approval status).
+ * Alias for isBusiness() with clearer naming for business status context.
+ */
+export function hasBusinessRole(user: User | null): boolean {
+  return hasRole(user, 'business');
+}
+
+/**
  * Check if a user has GitHub linked.
  */
 export function hasGithubLinked(user: User | null): boolean {

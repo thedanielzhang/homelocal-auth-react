@@ -11,10 +11,17 @@ export interface User {
   name: string;
   home_geo_region: string | null;
   roles?: string[];
+  /** Business user approval status (only populated for users with "business" role) */
+  business_status?: BusinessStatus | null;
   github_linked?: boolean;
   github_login?: string | null;
   dev_onboarding_state?: 'complete' | 'needs_github' | null;
 }
+
+/**
+ * Business user approval status values.
+ */
+export type BusinessStatus = 'pending_approval' | 'approved' | 'rejected' | 'suspended';
 
 /**
  * Valid user roles.

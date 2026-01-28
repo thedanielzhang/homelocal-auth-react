@@ -25,5 +25,5 @@ export { TokenManager, createTokenManager } from './TokenManager';
 // Axios integration
 export { createAuthenticatedClient, attachBearerToken } from './axios';
 // Role helpers
-export { hasRole, hasAnyRole, isAdmin, isDeveloper } from './roles';
+export { hasRole, hasAnyRole, isAdmin, isDeveloper, isBusiness, isApprovedBusiness, hasBusinessRole } from './roles';
 //# sourceMappingURL=index.js.map

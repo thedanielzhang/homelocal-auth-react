@@ -19,7 +19,7 @@
  */
 
 // Core types
-export type { User, UserRole, AuthConfig, AuthState, TokenResponse, LoginCredentials } from './types';
+export type { User, UserRole, BusinessStatus, AuthConfig, AuthState, TokenResponse, LoginCredentials } from './types';
 
 // Context and hooks
 export { AuthProvider, useAuth } from './AuthProvider';
@@ -34,4 +34,4 @@ export { createAuthenticatedClient, attachBearerToken } from './axios';
 export type { AuthenticatedClientConfig } from './axios';
 
 // Role helpers
-export { hasRole, hasAnyRole, isAdmin, isDeveloper } from './roles';
+export { hasRole, hasAnyRole, isAdmin, isDeveloper, isBusiness, isApprovedBusiness, hasBusinessRole } from './roles';

@@ -17,12 +17,12 @@
  * }
  * ```
  */
-export type { User, UserRole, AuthConfig, AuthState, TokenResponse, LoginCredentials } from './types';
+export type { User, UserRole, BusinessStatus, AuthConfig, AuthState, TokenResponse, LoginCredentials } from './types';
 export { AuthProvider, useAuth } from './AuthProvider';
 export { useRequireAuth, useRequireRole } from './hooks';
 export { TokenManager, createTokenManager } from './TokenManager';
 export type { TokenManagerConfig, TokenManagerInstance } from './TokenManager';
 export { createAuthenticatedClient, attachBearerToken } from './axios';
 export type { AuthenticatedClientConfig } from './axios';
-export { hasRole, hasAnyRole, isAdmin, isDeveloper } from './roles';
+export { hasRole, hasAnyRole, isAdmin, isDeveloper, isBusiness, isApprovedBusiness, hasBusinessRole } from './roles';
 //# sourceMappingURL=index.d.ts.map
