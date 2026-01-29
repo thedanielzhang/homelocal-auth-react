@@ -84,6 +84,11 @@ export interface AuthContextValue extends AuthState {
    * Get the token manager instance.
    */
   getTokenManager: () => TokenManagerInstance;
+
+  /**
+   * The configured auth service URL.
+   */
+  authServiceUrl: string;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -324,8 +329,9 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       isAdmin: isAdmin(user),
       isDeveloper: isDeveloper(user),
       getTokenManager: () => tokenManager,
+      authServiceUrl: config.authServiceUrl,
     }),
-    [user, isLoading, error, login, logout, signup, refreshUser, refreshToken, clearError, tokenManager]
+    [user, isLoading, error, login, logout, signup, refreshUser, refreshToken, clearError, tokenManager, config.authServiceUrl]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

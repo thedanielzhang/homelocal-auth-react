@@ -200,7 +200,8 @@ export function AuthProvider({ config, children }) {
         isAdmin: isAdmin(user),
         isDeveloper: isDeveloper(user),
         getTokenManager: () => tokenManager,
-    }), [user, isLoading, error, login, logout, signup, refreshUser, refreshToken, clearError, tokenManager]);
+        authServiceUrl: config.authServiceUrl,
+    }), [user, isLoading, error, login, logout, signup, refreshUser, refreshToken, clearError, tokenManager, config.authServiceUrl]);
     return _jsx(AuthContext.Provider, { value: value, children: children });
 }
 /**

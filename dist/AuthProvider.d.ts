@@ -54,6 +54,10 @@ export interface AuthContextValue extends AuthState {
      * Get the token manager instance.
      */
     getTokenManager: () => TokenManagerInstance;
+    /**
+     * The configured auth service URL.
+     */
+    authServiceUrl: string;
 }
 /**
  * Props for AuthProvider.

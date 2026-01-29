@@ -35,3 +35,24 @@ export type { AuthenticatedClientConfig } from './axios';
 
 // Role helpers
 export { hasRole, hasAnyRole, isAdmin, isDeveloper, isBusiness, isApprovedBusiness, hasBusinessRole } from './roles';
+
+// OAuth utilities
+export { createOAuthClient, generateOAuthState, parseOAuthCallback } from './oauth';
+export { useOAuth } from './useOAuth';
+export { OAuthCallbackPage } from './OAuthCallbackPage';
+
+// OAuth types
+export type {
+  OAuthConfig,
+  OAuthClient,
+  OAuthLoginOptions,
+  OAuthExchangeOptions,
+  OAuthTokenResponse,
+} from './types';
+
+export type { UseOAuthConfig, UseOAuthReturn } from './useOAuth';
+
+export type {
+  OAuthCallbackPageProps,
+  OAuthCallbackStatus,
+} from './OAuthCallbackPage';

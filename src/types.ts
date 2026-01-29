@@ -125,3 +125,90 @@ export interface LoginResponse {
   success: boolean;
   user: User;
 }
+
+// ============================================================================
+// OAuth Types
+// ============================================================================
+
+/**
+ * Configuration for OAuth client
+ */
+export interface OAuthConfig {
+  /** OAuth client ID registered with auth service */
+  clientId: string;
+
+  /**
+   * Path for OAuth callback route (e.g., '/auth/callback' or '/oauth/callback')
+   * Will be combined with window.location.origin to form full redirect_uri
+   */
+  callbackPath: string;
+
+  /**
+   * OAuth scopes to request
+   * @default 'openid profile email'
+   */
+  scope?: string;
+
+  /**
+   * Auth service base URL (e.g., 'https://auth.iriai.app')
+   * If not provided, must be passed to individual functions or use useOAuth hook
+   */
+  authServiceUrl?: string;
+}
+
+/**
+ * Options for initiating OAuth login
+ */
+export interface OAuthLoginOptions {
+  /** Path to return to after successful login */
+  returnPath?: string;
+
+  /** Override the default auth service URL */
+  authServiceUrl?: string;
+}
+
+/**
+ * Options for OAuth token exchange
+ */
+export interface OAuthExchangeOptions {
+  /** Override the default auth service URL */
+  authServiceUrl?: string;
+}
+
+/**
+ * Result from OAuth token exchange
+ */
+export interface OAuthTokenResponse {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  id_token?: string;
+  refresh_token?: string;
+  scope?: string;
+}
+
+/**
+ * OAuth client instance returned by createOAuthClient
+ */
+export interface OAuthClient {
+  /** Initiate OAuth login flow by redirecting to auth service */
+  initiateLogin: (options?: OAuthLoginOptions) => void;
+
+  /** Validate state parameter from callback */
+  validateState: (state: string) => boolean;
+
+  /** Exchange authorization code for tokens */
+  exchangeCode: (code: string, options?: OAuthExchangeOptions) => Promise<OAuthTokenResponse>;
+
+  /** Clear OAuth state from storage */
+  clearState: () => void;
+
+  /** Get and clear the stored return path */
+  getReturnPath: () => string;
+
+  /** Get the configured redirect URI */
+  getRedirectUri: () => string;
+
+  /** Get the OAuth configuration */
+  getConfig: () => OAuthConfig;
+}
