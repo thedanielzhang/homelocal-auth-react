@@ -40,8 +40,31 @@ function createAuthApi(config) {
             body: JSON.stringify(data),
         }),
         getCurrentUser: () => request('/auth/me'),
-        getAccessToken: () => request('/auth/token', { method: 'POST' }),
+        // getAccessToken removed - token refresh now uses OAuth refresh tokens
+        // via POST /oauth/token with grant_type=refresh_token
     };
+}
+/**
+ * Perform OAuth token refresh using httpOnly cookie.
+ * Returns the token response or throws on failure.
+ */
+async function refreshAccessTokenViaOAuth(authServiceUrl, clientId) {
+    const response = await fetch(`${authServiceUrl}/oauth/token`, {
+        method: 'POST',
+        credentials: 'include', // Sends httpOnly refresh_token cookie
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            client_id: clientId,
+        }),
+    });
+    if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Token refresh failed: ${response.status} ${error}`);
+    }
+    return response.json();
 }
 /**
  * Authentication provider component.
@@ -69,8 +92,24 @@ export function AuthProvider({ config, children }) {
             expiryKey: config.tokenExpiryKey ?? 'access_token_expiry',
             expiryBuffer: config.tokenRefreshBuffer ?? 60,
             tokenFetcher: async () => {
-                const api = createAuthApi(config);
-                return api.getAccessToken();
+                // Use OAuth refresh token flow instead of session-based /auth/token
+                // The refresh token is stored as an httpOnly cookie and sent automatically
+                const response = await fetch(`${config.authServiceUrl}/oauth/token`, {
+                    method: 'POST',
+                    credentials: 'include', // Sends httpOnly refresh_token cookie
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        grant_type: 'refresh_token',
+                        client_id: config.clientId,
+                    }),
+                });
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(`Token refresh failed: ${response.status} ${error}`);
+                }
+                return response.json();
             },
             onRenewalFailure: () => {
                 handleUnauthorized();
@@ -85,13 +124,13 @@ export function AuthProvider({ config, children }) {
             try {
                 const currentUser = await authApi.getCurrentUser();
                 setUser(currentUser);
-                // Fetch access token for API calls
+                // Fetch access token using OAuth refresh token flow
                 try {
-                    const tokenResponse = await authApi.getAccessToken();
+                    const tokenResponse = await refreshAccessTokenViaOAuth(config.authServiceUrl, config.clientId);
                     tokenManager.setToken(tokenResponse.access_token, tokenResponse.expires_in);
                 }
                 catch {
-                    console.warn('Failed to fetch access token');
+                    console.warn('Failed to fetch access token via OAuth refresh');
                 }
             }
             catch {
@@ -104,19 +143,20 @@ export function AuthProvider({ config, children }) {
             }
         };
         checkAuth();
-    }, [authApi, tokenManager]);
+    }, [authApi, tokenManager, config.authServiceUrl, config.clientId]);
     const login = useCallback(async (credentials) => {
         setError(null);
         setIsLoading(true);
         try {
             const response = await authApi.login(credentials);
-            // Fetch and store access token BEFORE setting user state
+            // Fetch and store access token using OAuth refresh token flow
+            // Note: After session login, the OAuth refresh token cookie should be set
             try {
-                const tokenResponse = await authApi.getAccessToken();
+                const tokenResponse = await refreshAccessTokenViaOAuth(config.authServiceUrl, config.clientId);
                 tokenManager.setToken(tokenResponse.access_token, tokenResponse.expires_in);
             }
             catch (tokenErr) {
-                console.error('Failed to fetch access token after login:', tokenErr);
+                console.error('Failed to fetch access token via OAuth refresh after login:', tokenErr);
             }
             setUser(response.user);
         }
@@ -128,7 +168,7 @@ export function AuthProvider({ config, children }) {
         finally {
             setIsLoading(false);
         }
-    }, [authApi, tokenManager]);
+    }, [authApi, tokenManager, config.authServiceUrl, config.clientId]);
     const logout = useCallback(async () => {
         setError(null);
         try {
@@ -173,14 +213,14 @@ export function AuthProvider({ config, children }) {
     }, [authApi]);
     const refreshToken = useCallback(async () => {
         try {
-            const tokenResponse = await authApi.getAccessToken();
+            const tokenResponse = await refreshAccessTokenViaOAuth(config.authServiceUrl, config.clientId);
             tokenManager.setToken(tokenResponse.access_token, tokenResponse.expires_in);
         }
         catch (err) {
-            console.error('Failed to refresh token:', err);
+            console.error('Failed to refresh token via OAuth:', err);
             throw err;
         }
-    }, [authApi, tokenManager]);
+    }, [tokenManager, config.authServiceUrl, config.clientId]);
     const clearError = useCallback(() => {
         setError(null);
     }, []);

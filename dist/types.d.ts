@@ -39,6 +39,11 @@ export interface AuthConfig {
      */
     authServiceUrl: string;
     /**
+     * OAuth client ID for token refresh.
+     * Required for OAuth refresh token flow.
+     */
+    clientId: string;
+    /**
      * Storage key for access token in sessionStorage.
      * @default "access_token"
      */

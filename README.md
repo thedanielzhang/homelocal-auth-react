@@ -184,8 +184,16 @@ const manager = createTokenManager({
   storageKey: 'my_token',
   expiryBuffer: 120,
   tokenFetcher: async () => {
-    // Fetch new token from your auth endpoint
-    const response = await fetch('/auth/token', { method: 'POST' });
+    // Fetch new token via OAuth refresh token
+    const response = await fetch('/oauth/token', {
+      method: 'POST',
+      credentials: 'include', // Sends httpOnly refresh_token cookie
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        client_id: 'your-client-id',
+      }),
+    });
     return response.json();
   },
   onRenewalFailure: (error) => {

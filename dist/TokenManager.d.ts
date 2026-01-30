@@ -27,7 +27,8 @@ export interface TokenManagerConfig {
      */
     expiryBuffer?: number;
     /**
-     * Function to fetch a new access token (cookie-based POST to /auth/token).
+     * Function to fetch a new access token via OAuth refresh token.
+     * Uses POST /oauth/token with grant_type=refresh_token.
      * If not provided, token renewal is disabled.
      */
     tokenFetcher?: () => Promise<TokenResponse>;
