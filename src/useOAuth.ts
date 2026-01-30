@@ -13,7 +13,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { useAuth } from './AuthProvider';
-import { createOAuthClient, parseOAuthCallback } from './oauth';
+import { createOAuthClient, parseOAuthCallback, STORAGE_KEYS } from './oauth';
 import type { OAuthConfig, OAuthTokenResponse } from './types';
 
 /**
@@ -178,6 +178,12 @@ export function useOAuth(config: UseOAuthConfig): UseOAuthReturn {
           throw new Error('Registration link expired. Please try again.');
         }
         isRegistrationFlow = true;
+
+        // Store returnUrl for post-callback navigation
+        // This enables getReturnPath() to find the intended destination
+        if (decodedState.returnUrl) {
+          sessionStorage.setItem(STORAGE_KEYS.RETURN_PATH, decodedState.returnUrl);
+        }
       }
     } catch (e) {
       // Not a JSON state or parse error - continue with normal validation

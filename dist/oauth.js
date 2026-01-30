@@ -17,7 +17,7 @@
  *   }
  */
 // Storage keys (namespaced to avoid collisions)
-const STORAGE_KEYS = {
+export const STORAGE_KEYS = {
     STATE: 'homelocal_oauth_state',
     RETURN_PATH: 'homelocal_oauth_return_path',
 };

@@ -17,6 +17,10 @@
  *   }
  */
 import type { OAuthConfig, OAuthClient } from './types';
+export declare const STORAGE_KEYS: {
+    readonly STATE: "homelocal_oauth_state";
+    readonly RETURN_PATH: "homelocal_oauth_return_path";
+};
 /**
  * Generate a cryptographically random state parameter for CSRF protection
  */
