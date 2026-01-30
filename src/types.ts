@@ -17,6 +17,8 @@ export interface User {
   business_name?: string | null;
   business_phone?: string | null;
   business_website?: string | null;
+  /** One-time flag to show welcome modal after registration (cleared after first token) */
+  show_welcome?: boolean;
   github_linked?: boolean;
   github_login?: string | null;
   dev_onboarding_state?: 'complete' | 'needs_github' | null;
