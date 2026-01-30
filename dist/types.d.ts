@@ -12,6 +12,10 @@ export interface User {
     roles?: string[];
     /** Business user approval status (only populated for users with "business" role) */
     business_status?: BusinessStatus | null;
+    /** Business profile fields for prepopulation (PRD Feature 6) - only present for business accounts */
+    business_name?: string | null;
+    business_phone?: string | null;
+    business_website?: string | null;
     github_linked?: boolean;
     github_login?: string | null;
     dev_onboarding_state?: 'complete' | 'needs_github' | null;
