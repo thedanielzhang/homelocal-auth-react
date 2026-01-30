@@ -14,6 +14,17 @@ import { useMemo, useCallback } from 'react';
 import { useAuth } from './AuthProvider';
 import { createOAuthClient, parseOAuthCallback } from './oauth';
 /**
+ * Check if a decoded state is a registration flow state
+ */
+function isRegistrationState(state) {
+    return (typeof state === 'object' &&
+        state !== null &&
+        'type' in state &&
+        state.type === 'registration' &&
+        'ts' in state &&
+        typeof state.ts === 'number');
+}
+/**
  * React hook for OAuth operations
  *
  * Integrates with AuthProvider to automatically use the configured authServiceUrl.
@@ -85,7 +96,31 @@ export function useOAuth(config) {
             oauthClient.clearState();
             throw new Error('Missing authorization code or state parameter');
         }
-        if (!oauthClient.validateState(state)) {
+        // Check if this is a registration flow (state contains type: "registration")
+        // Registration flows come from auth-frontend after user registration,
+        // and bypass normal CSRF validation since they can't share sessionStorage
+        let isRegistrationFlow = false;
+        try {
+            const decodedState = JSON.parse(atob(state));
+            if (isRegistrationState(decodedState)) {
+                // Validate timestamp (2 minute expiry for safety margin)
+                const age = Date.now() - decodedState.ts;
+                if (age > 120000) {
+                    oauthClient.clearState();
+                    throw new Error('Registration link expired. Please try again.');
+                }
+                isRegistrationFlow = true;
+            }
+        }
+        catch (e) {
+            // Not a JSON state or parse error - continue with normal validation
+            // But re-throw if it's our expiry error
+            if (e instanceof Error && e.message.includes('expired')) {
+                throw e;
+            }
+        }
+        // For non-registration flows, validate state against stored value (CSRF protection)
+        if (!isRegistrationFlow && !oauthClient.validateState(state)) {
             oauthClient.clearState();
             throw new Error('Invalid state parameter. Possible CSRF attack. Please try logging in again.');
         }
