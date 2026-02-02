@@ -30,4 +30,6 @@ export { hasRole, hasAnyRole, isAdmin, isDeveloper, isBusiness, isApprovedBusine
 export { createOAuthClient, generateOAuthState, parseOAuthCallback } from './oauth';
 export { useOAuth } from './useOAuth';
 export { OAuthCallbackPage } from './OAuthCallbackPage';
+// Silent auth (for BFF mode)
+export { trySilentAuth, isSilentAuthLikelyBlocked, } from './silentAuth';
 //# sourceMappingURL=index.js.map

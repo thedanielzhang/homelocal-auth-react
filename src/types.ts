@@ -78,6 +78,78 @@ export interface AuthConfig {
    * @default 60
    */
   tokenRefreshBuffer?: number;
+
+  /**
+   * Authentication mode.
+   * - 'direct': First-party apps on same domain (use OAuth refresh token)
+   * - 'bff': Third-party apps on different domain (use BFF pattern with silent auth)
+   *
+   * @default 'direct'
+   */
+  mode?: 'direct' | 'bff';
+
+  /**
+   * BFF mode configuration. Required when mode is 'bff'.
+   */
+  bff?: BffConfig;
+}
+
+/**
+ * Configuration for BFF (Backend-for-Frontend) mode.
+ * Used by third-party apps that need silent authentication via hidden iframe.
+ */
+export interface BffConfig {
+  /**
+   * URL of your BFF backend's token exchange endpoint.
+   * This endpoint receives the auth code and exchanges it for tokens.
+   * @example "https://api.myapp.com/auth/exchange"
+   */
+  tokenExchangeUrl: string;
+
+  /**
+   * URL of your BFF backend's login initiation endpoint.
+   * Called when user clicks login button.
+   * @example "https://api.myapp.com/auth/login"
+   */
+  loginUrl: string;
+
+  /**
+   * URL of your BFF backend's user info endpoint.
+   * Returns current user data from access token cookie.
+   * @example "https://api.myapp.com/auth/me"
+   */
+  userInfoUrl: string;
+
+  /**
+   * URL of your BFF backend's logout endpoint.
+   * @example "https://api.myapp.com/auth/logout"
+   */
+  logoutUrl?: string;
+
+  /**
+   * OAuth scopes to request.
+   * @default "openid profile email"
+   */
+  scope?: string;
+
+  /**
+   * Timeout for silent auth in milliseconds.
+   * @default 5000
+   */
+  silentAuthTimeout?: number;
+
+  /**
+   * Whether to attempt silent auth on mount.
+   * Set to false to disable automatic silent auth.
+   * @default true
+   */
+  enableSilentAuth?: boolean;
+
+  /**
+   * Enable debug logging for silent auth.
+   * @default false
+   */
+  debug?: boolean;
 }
 
 /**

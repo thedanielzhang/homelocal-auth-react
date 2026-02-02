@@ -17,7 +17,7 @@
  * }
  * ```
  */
-export type { User, UserRole, BusinessStatus, AuthConfig, AuthState, TokenResponse, LoginCredentials } from './types';
+export type { User, UserRole, BusinessStatus, AuthConfig, AuthState, TokenResponse, LoginCredentials, BffConfig } from './types';
 export { AuthProvider, useAuth } from './AuthProvider';
 export { useRequireAuth, useRequireRole } from './hooks';
 export { TokenManager, createTokenManager } from './TokenManager';
@@ -31,4 +31,5 @@ export { OAuthCallbackPage } from './OAuthCallbackPage';
 export type { OAuthConfig, OAuthClient, OAuthLoginOptions, OAuthExchangeOptions, OAuthTokenResponse, } from './types';
 export type { UseOAuthConfig, UseOAuthReturn } from './useOAuth';
 export type { OAuthCallbackPageProps, OAuthCallbackStatus, } from './OAuthCallbackPage';
+export { trySilentAuth, isSilentAuthLikelyBlocked, type SilentAuthConfig, type SilentAuthResult, } from './silentAuth';
 //# sourceMappingURL=index.d.ts.map

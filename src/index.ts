@@ -19,7 +19,7 @@
  */
 
 // Core types
-export type { User, UserRole, BusinessStatus, AuthConfig, AuthState, TokenResponse, LoginCredentials } from './types';
+export type { User, UserRole, BusinessStatus, AuthConfig, AuthState, TokenResponse, LoginCredentials, BffConfig } from './types';
 
 // Context and hooks
 export { AuthProvider, useAuth } from './AuthProvider';
@@ -56,3 +56,11 @@ export type {
   OAuthCallbackPageProps,
   OAuthCallbackStatus,
 } from './OAuthCallbackPage';
+
+// Silent auth (for BFF mode)
+export {
+  trySilentAuth,
+  isSilentAuthLikelyBlocked,
+  type SilentAuthConfig,
+  type SilentAuthResult,
+} from './silentAuth';
