@@ -4,11 +4,11 @@ import { jsx as _jsx } from "react/jsx-runtime";
  *
  * Provides user authentication state and methods throughout the React app.
  */
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, } from 'react';
+import { useContext, useState, useEffect, useCallback, useMemo, } from 'react';
 import { createTokenManager } from './TokenManager';
 import { hasRole, hasAnyRole, isAdmin, isDeveloper } from './roles';
 import { trySilentAuth, isSilentAuthLikelyBlocked } from './silentAuth';
-const AuthContext = createContext(undefined);
+import { AuthContext } from './AuthContext';
 /**
  * Create an auth API client for the given config.
  */
@@ -364,7 +364,7 @@ export function AuthProvider({ config, children }) {
 export function useAuth() {
     const context = useContext(AuthContext);
     if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error('useAuth must be used within an AuthProvider or ExternalTokenProvider');
     }
     return context;
 }

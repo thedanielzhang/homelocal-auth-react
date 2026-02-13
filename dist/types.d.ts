@@ -10,6 +10,8 @@ export interface User {
     name: string;
     home_geo_region: string | null;
     roles?: string[];
+    /** Account type: "personal" or "business" */
+    account_type?: string;
     /** Business user approval status (only populated for users with "business" role) */
     business_status?: BusinessStatus | null;
     /** Business profile fields for prepopulation (PRD Feature 6) - only present for business accounts */

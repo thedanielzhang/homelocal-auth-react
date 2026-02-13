@@ -19,6 +19,7 @@
  */
 // Context and hooks
 export { AuthProvider, useAuth } from './AuthProvider';
+export { ExternalTokenProvider } from './ExternalTokenProvider';
 export { useRequireAuth, useRequireRole } from './hooks';
 // Token management
 export { TokenManager, createTokenManager } from './TokenManager';

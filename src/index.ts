@@ -23,6 +23,9 @@ export type { User, UserRole, BusinessStatus, AuthConfig, AuthState, TokenRespon
 
 // Context and hooks
 export { AuthProvider, useAuth } from './AuthProvider';
+export type { AuthContextValue } from './AuthProvider';
+export { ExternalTokenProvider } from './ExternalTokenProvider';
+export type { ExternalTokenProviderProps } from './ExternalTokenProvider';
 export { useRequireAuth, useRequireRole } from './hooks';
 
 // Token management

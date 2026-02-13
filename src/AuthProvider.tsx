@@ -5,7 +5,6 @@
  */
 
 import {
-  createContext,
   useContext,
   useState,
   useEffect,
@@ -92,7 +91,7 @@ export interface AuthContextValue extends AuthState {
   authServiceUrl: string;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+import { AuthContext } from './AuthContext';
 
 /**
  * Props for AuthProvider.
@@ -519,7 +518,7 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider or ExternalTokenProvider');
   }
   return context;
 }

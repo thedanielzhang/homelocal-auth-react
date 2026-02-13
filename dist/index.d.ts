@@ -19,6 +19,9 @@
  */
 export type { User, UserRole, BusinessStatus, AuthConfig, AuthState, TokenResponse, LoginCredentials, BffConfig } from './types';
 export { AuthProvider, useAuth } from './AuthProvider';
+export type { AuthContextValue } from './AuthProvider';
+export { ExternalTokenProvider } from './ExternalTokenProvider';
+export type { ExternalTokenProviderProps } from './ExternalTokenProvider';
 export { useRequireAuth, useRequireRole } from './hooks';
 export { TokenManager, createTokenManager } from './TokenManager';
 export type { TokenManagerConfig, TokenManagerInstance } from './TokenManager';
