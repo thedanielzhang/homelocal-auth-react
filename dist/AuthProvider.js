@@ -8,6 +8,7 @@ import { useContext, useState, useEffect, useCallback, useMemo, } from 'react';
 import { createTokenManager } from './TokenManager';
 import { hasRole, hasAnyRole, isAdmin, isDeveloper } from './roles';
 import { trySilentAuth, isSilentAuthLikelyBlocked } from './silentAuth';
+import { decodeJwtPayload, userFromClaims } from './jwtUtils';
 import { AuthContext } from './AuthContext';
 /**
  * Create an auth API client for the given config.
@@ -203,16 +204,32 @@ export function AuthProvider({ config, children }) {
                     // =================================================================
                     // Direct Mode: First-party app on same domain
                     // =================================================================
-                    const currentUser = await authApi.getCurrentUser();
-                    setUser(currentUser);
-                    // Fetch access token using OAuth refresh token flow
+                    // Step 1: Try to get user from session cookie (may fail if expired)
+                    let currentUser = null;
+                    try {
+                        currentUser = await authApi.getCurrentUser();
+                    }
+                    catch {
+                        // Session cookie likely expired — will try refresh token next
+                    }
+                    // Step 2: Try to refresh the access token via OAuth refresh token
+                    // The refresh token cookie (90-day) outlives the session cookie (2hr)
                     try {
                         const tokenResponse = await refreshAccessTokenViaOAuth(config.authServiceUrl, config.clientId);
                         tokenManager.setToken(tokenResponse.access_token, tokenResponse.expires_in);
+                        // Step 3: If session was expired but refresh succeeded, extract
+                        // user info from the JWT so we're not stuck logged-out
+                        if (!currentUser) {
+                            const claims = decodeJwtPayload(tokenResponse.access_token);
+                            if (claims) {
+                                currentUser = userFromClaims(claims);
+                            }
+                        }
                     }
                     catch {
                         console.warn('Failed to fetch access token via OAuth refresh');
                     }
+                    setUser(currentUser);
                 }
             }
             catch {
