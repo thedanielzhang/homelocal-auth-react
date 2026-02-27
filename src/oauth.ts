@@ -222,6 +222,7 @@ export function createOAuthClient(config: OAuthConfig): OAuthClient {
   function clearState(): void {
     if (typeof window === 'undefined') return;
     sessionStorage.removeItem(STORAGE_KEYS.STATE);
+    sessionStorage.removeItem(STORAGE_KEYS.CODE_VERIFIER);
   }
 
   /**

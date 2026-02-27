@@ -178,6 +178,7 @@ export function AuthProvider({ config, children }) {
                                     body: JSON.stringify({
                                         code: silentResult.code,
                                         state: silentResult.state,
+                                        code_verifier: silentResult.codeVerifier,
                                     }),
                                 });
                                 if (!response.ok) {

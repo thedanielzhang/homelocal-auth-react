@@ -180,6 +180,7 @@ export function createOAuthClient(config) {
         if (typeof window === 'undefined')
             return;
         sessionStorage.removeItem(STORAGE_KEYS.STATE);
+        sessionStorage.removeItem(STORAGE_KEYS.CODE_VERIFIER);
     }
     /**
      * Get and clear the stored return path

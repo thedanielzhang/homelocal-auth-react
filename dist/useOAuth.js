@@ -68,12 +68,12 @@ export function useOAuth(config) {
         });
     }, [config.clientId, config.callbackPath, config.scope, authServiceUrl]);
     // Wrap initiateLogin to accept just returnPath for convenience
-    const initiateLogin = useCallback((returnPath) => {
+    const initiateLogin = useCallback(async (returnPath) => {
         if (!authServiceUrl) {
             throw new Error('authServiceUrl is not configured. Ensure AuthProvider is set up with authServiceUrl, ' +
                 'or pass authServiceUrl directly to useOAuth config.');
         }
-        oauthClient.initiateLogin({ returnPath });
+        await oauthClient.initiateLogin({ returnPath });
     }, [oauthClient, authServiceUrl]);
     // Parse callback from current URL
     const parseCallback = useCallback(() => {

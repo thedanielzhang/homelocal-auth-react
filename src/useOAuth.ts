@@ -52,7 +52,7 @@ function isRegistrationState(state: unknown): state is RegistrationState {
  */
 export interface UseOAuthReturn {
   /** Redirect to OAuth login */
-  initiateLogin: (returnPath?: string) => void;
+  initiateLogin: (returnPath?: string) => Promise<void>;
 
   /**
    * Handle OAuth callback - validates state and exchanges code
@@ -125,14 +125,14 @@ export function useOAuth(config: UseOAuthConfig): UseOAuthReturn {
   }, [config.clientId, config.callbackPath, config.scope, authServiceUrl]);
 
   // Wrap initiateLogin to accept just returnPath for convenience
-  const initiateLogin = useCallback((returnPath?: string) => {
+  const initiateLogin = useCallback(async (returnPath?: string): Promise<void> => {
     if (!authServiceUrl) {
       throw new Error(
         'authServiceUrl is not configured. Ensure AuthProvider is set up with authServiceUrl, ' +
         'or pass authServiceUrl directly to useOAuth config.'
       );
     }
-    oauthClient.initiateLogin({ returnPath });
+    await oauthClient.initiateLogin({ returnPath });
   }, [oauthClient, authServiceUrl]);
 
   // Parse callback from current URL
