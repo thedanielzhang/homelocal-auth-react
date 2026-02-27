@@ -29,6 +29,7 @@ import type {
 export const STORAGE_KEYS = {
   STATE: 'homelocal_oauth_state',
   RETURN_PATH: 'homelocal_oauth_return_path',
+  CODE_VERIFIER: 'homelocal_oauth_code_verifier',
 } as const;
 
 // Default scope for OAuth requests
@@ -41,6 +42,33 @@ export function generateOAuthState(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
   return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Generate a PKCE code_verifier (43-128 character URL-safe random string)
+ */
+export function generateCodeVerifier(): string {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  // Base64url encode without padding — produces 43 characters from 32 bytes
+  return btoa(String.fromCharCode(...array))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+/**
+ * Compute PKCE code_challenge from a code_verifier using S256 method
+ * code_challenge = base64url(sha256(code_verifier))
+ */
+export async function generateCodeChallenge(verifier: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(verifier);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return btoa(String.fromCharCode(...new Uint8Array(digest)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 }
 
 /**
@@ -93,9 +121,10 @@ export function createOAuthClient(config: OAuthConfig): OAuthClient {
   }
 
   /**
-   * Initiate OAuth login flow by redirecting to the authorization endpoint
+   * Initiate OAuth login flow by redirecting to the authorization endpoint.
+   * Includes PKCE (S256) code_challenge for security.
    */
-  function initiateLogin(options?: OAuthLoginOptions): void {
+  async function initiateLogin(options?: OAuthLoginOptions): Promise<void> {
     if (typeof window === 'undefined') {
       throw new Error('initiateLogin() can only be called in browser environment');
     }
@@ -117,12 +146,19 @@ export function createOAuthClient(config: OAuthConfig): OAuthClient {
       );
     }
 
+    // PKCE: Generate and store code_verifier, compute code_challenge
+    const codeVerifier = generateCodeVerifier();
+    sessionStorage.setItem(STORAGE_KEYS.CODE_VERIFIER, codeVerifier);
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
+
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: getRedirectUri(),
       response_type: 'code',
       scope: scope,
       state: state,
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
     });
 
     window.location.href = `${authServiceUrl}/oauth/authorize?${params.toString()}`;
@@ -140,7 +176,8 @@ export function createOAuthClient(config: OAuthConfig): OAuthClient {
   }
 
   /**
-   * Exchange authorization code for tokens
+   * Exchange authorization code for tokens.
+   * Includes PKCE code_verifier from sessionStorage.
    */
   async function exchangeCode(
     code: string,
@@ -148,17 +185,26 @@ export function createOAuthClient(config: OAuthConfig): OAuthClient {
   ): Promise<OAuthTokenResponse> {
     const authServiceUrl = resolveAuthServiceUrl(options);
 
+    // PKCE: Retrieve and consume stored code_verifier
+    const codeVerifier = sessionStorage.getItem(STORAGE_KEYS.CODE_VERIFIER) || undefined;
+    sessionStorage.removeItem(STORAGE_KEYS.CODE_VERIFIER);
+
+    const body: Record<string, string> = {
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: getRedirectUri(),
+      client_id: clientId,
+    };
+    if (codeVerifier) {
+      body.code_verifier = codeVerifier;
+    }
+
     const response = await fetch(`${authServiceUrl}/oauth/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: getRedirectUri(),
-        client_id: clientId,
-      }),
+      body: new URLSearchParams(body),
       credentials: 'include', // Include cookies for session establishment
     });
 

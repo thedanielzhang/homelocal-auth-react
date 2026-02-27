@@ -5,6 +5,8 @@
  * is already authenticated with the auth service without requiring user interaction.
  */
 
+import { generateCodeVerifier, generateCodeChallenge } from './oauth';
+
 export interface SilentAuthConfig {
   /** Auth service base URL (e.g., https://auth.iriai.app) */
   authServiceUrl: string;
@@ -23,6 +25,8 @@ export interface SilentAuthResult {
   success: boolean;
   /** Authorization code (if success) */
   code?: string;
+  /** PKCE code_verifier — caller must pass this to the BFF for token exchange */
+  codeVerifier?: string;
   /** Error code (if failure) */
   error?: string;
   /** Error description (if failure) */
@@ -87,7 +91,7 @@ function encodeState(originalState: string, origin: string): string {
  * }
  * ```
  */
-export function trySilentAuth(config: SilentAuthConfig): Promise<SilentAuthResult> {
+export async function trySilentAuth(config: SilentAuthConfig): Promise<SilentAuthResult> {
   const timeout = config.timeout ?? 5000;
   const scope = config.scope ?? 'openid profile email';
   const debug = config.debug ?? false;
@@ -95,6 +99,10 @@ export function trySilentAuth(config: SilentAuthConfig): Promise<SilentAuthResul
   const log = (...args: unknown[]) => {
     if (debug) console.log('[SilentAuth]', ...args);
   };
+
+  // PKCE: Generate code_verifier and code_challenge before entering the Promise
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = await generateCodeChallenge(codeVerifier);
 
   return new Promise((resolve) => {
     const originalState = generateState();
@@ -106,7 +114,7 @@ export function trySilentAuth(config: SilentAuthConfig): Promise<SilentAuthResul
     // Build silent auth redirect URI (on auth service)
     const silentCallbackUrl = `${config.authServiceUrl}/oauth/silent-callback`;
 
-    // Build authorization URL with prompt=none
+    // Build authorization URL with prompt=none and PKCE
     const params = new URLSearchParams({
       client_id: config.clientId,
       redirect_uri: silentCallbackUrl,
@@ -114,6 +122,8 @@ export function trySilentAuth(config: SilentAuthConfig): Promise<SilentAuthResul
       scope: scope,
       state: encodedState,
       prompt: 'none',
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
     });
 
     const authUrl = `${config.authServiceUrl}/oauth/authorize?${params.toString()}`;
@@ -159,6 +169,7 @@ export function trySilentAuth(config: SilentAuthConfig): Promise<SilentAuthResul
         resolve({
           success: true,
           code: event.data.code,
+          codeVerifier,
           state: event.data.state,
         });
       } else {

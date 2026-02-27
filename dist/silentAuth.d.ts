@@ -21,6 +21,8 @@ export interface SilentAuthResult {
     success: boolean;
     /** Authorization code (if success) */
     code?: string;
+    /** PKCE code_verifier — caller must pass this to the BFF for token exchange */
+    codeVerifier?: string;
     /** Error code (if failure) */
     error?: string;
     /** Error description (if failure) */

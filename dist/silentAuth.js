@@ -4,6 +4,7 @@
  * This module enables third-party apps (on different domains) to check if a user
  * is already authenticated with the auth service without requiring user interaction.
  */
+import { generateCodeVerifier, generateCodeChallenge } from './oauth';
 /**
  * Generate cryptographically secure random state.
  */
@@ -47,7 +48,7 @@ function encodeState(originalState, origin) {
  * }
  * ```
  */
-export function trySilentAuth(config) {
+export async function trySilentAuth(config) {
     const timeout = config.timeout ?? 5000;
     const scope = config.scope ?? 'openid profile email';
     const debug = config.debug ?? false;
@@ -55,6 +56,9 @@ export function trySilentAuth(config) {
         if (debug)
             console.log('[SilentAuth]', ...args);
     };
+    // PKCE: Generate code_verifier and code_challenge before entering the Promise
+    const codeVerifier = generateCodeVerifier();
+    const codeChallenge = await generateCodeChallenge(codeVerifier);
     return new Promise((resolve) => {
         const originalState = generateState();
         const parentOrigin = window.location.origin;
@@ -62,7 +66,7 @@ export function trySilentAuth(config) {
         const encodedState = encodeState(originalState, parentOrigin);
         // Build silent auth redirect URI (on auth service)
         const silentCallbackUrl = `${config.authServiceUrl}/oauth/silent-callback`;
-        // Build authorization URL with prompt=none
+        // Build authorization URL with prompt=none and PKCE
         const params = new URLSearchParams({
             client_id: config.clientId,
             redirect_uri: silentCallbackUrl,
@@ -70,6 +74,8 @@ export function trySilentAuth(config) {
             scope: scope,
             state: encodedState,
             prompt: 'none',
+            code_challenge: codeChallenge,
+            code_challenge_method: 'S256',
         });
         const authUrl = `${config.authServiceUrl}/oauth/authorize?${params.toString()}`;
         log('Starting silent auth:', authUrl);
@@ -107,6 +113,7 @@ export function trySilentAuth(config) {
                 resolve({
                     success: true,
                     code: event.data.code,
+                    codeVerifier,
                     state: event.data.state,
                 });
             }

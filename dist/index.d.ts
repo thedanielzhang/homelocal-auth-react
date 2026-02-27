@@ -28,7 +28,7 @@ export type { TokenManagerConfig, TokenManagerInstance } from './TokenManager';
 export { createAuthenticatedClient, attachBearerToken } from './axios';
 export type { AuthenticatedClientConfig } from './axios';
 export { hasRole, hasAnyRole, isAdmin, isDeveloper, isBusiness, isApprovedBusiness, hasBusinessRole } from './roles';
-export { createOAuthClient, generateOAuthState, parseOAuthCallback } from './oauth';
+export { createOAuthClient, generateOAuthState, generateCodeVerifier, generateCodeChallenge, parseOAuthCallback } from './oauth';
 export { useOAuth } from './useOAuth';
 export { OAuthCallbackPage } from './OAuthCallbackPage';
 export type { OAuthConfig, OAuthClient, OAuthLoginOptions, OAuthExchangeOptions, OAuthTokenResponse, } from './types';

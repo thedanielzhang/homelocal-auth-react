@@ -20,11 +20,21 @@ import type { OAuthConfig, OAuthClient } from './types';
 export declare const STORAGE_KEYS: {
     readonly STATE: "homelocal_oauth_state";
     readonly RETURN_PATH: "homelocal_oauth_return_path";
+    readonly CODE_VERIFIER: "homelocal_oauth_code_verifier";
 };
 /**
  * Generate a cryptographically random state parameter for CSRF protection
  */
 export declare function generateOAuthState(): string;
+/**
+ * Generate a PKCE code_verifier (43-128 character URL-safe random string)
+ */
+export declare function generateCodeVerifier(): string;
+/**
+ * Compute PKCE code_challenge from a code_verifier using S256 method
+ * code_challenge = base64url(sha256(code_verifier))
+ */
+export declare function generateCodeChallenge(verifier: string): Promise<string>;
 /**
  * Create an OAuth client with the given configuration
  *
