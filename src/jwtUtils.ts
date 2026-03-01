@@ -36,5 +36,8 @@ export function userFromClaims(claims: Record<string, unknown>): User {
     roles: (claims.roles as string[]) || [],
     account_type: claims.account_type as string | undefined,
     business_status: (claims.business_status as User['business_status']) || null,
+    github_linked: (claims.github_linked as boolean) || false,
+    github_login: (claims.github_login as string) || null,
+    dev_onboarding_state: (claims.dev_onboarding_state as User['dev_onboarding_state']) || null,
   };
 }

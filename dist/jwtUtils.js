@@ -34,6 +34,9 @@ export function userFromClaims(claims) {
         roles: claims.roles || [],
         account_type: claims.account_type,
         business_status: claims.business_status || null,
+        github_linked: claims.github_linked || false,
+        github_login: claims.github_login || null,
+        dev_onboarding_state: claims.dev_onboarding_state || null,
     };
 }
 //# sourceMappingURL=jwtUtils.js.map
