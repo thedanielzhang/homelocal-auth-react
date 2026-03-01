@@ -24,7 +24,7 @@ export type UseOAuthConfig = Omit<OAuthConfig, 'authServiceUrl'> & {
  */
 export interface UseOAuthReturn {
     /** Redirect to OAuth login */
-    initiateLogin: (returnPath?: string) => void;
+    initiateLogin: (returnPath?: string) => Promise<void>;
     /**
      * Handle OAuth callback - validates state and exchanges code
      * @returns Token response on success

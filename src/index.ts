@@ -40,7 +40,7 @@ export type { AuthenticatedClientConfig } from './axios';
 export { hasRole, hasAnyRole, isAdmin, isDeveloper, isBusiness, isApprovedBusiness, hasBusinessRole } from './roles';
 
 // OAuth utilities
-export { createOAuthClient, generateOAuthState, parseOAuthCallback } from './oauth';
+export { createOAuthClient, generateOAuthState, generateCodeVerifier, generateCodeChallenge, parseOAuthCallback } from './oauth';
 export { useOAuth } from './useOAuth';
 export { OAuthCallbackPage } from './OAuthCallbackPage';
 

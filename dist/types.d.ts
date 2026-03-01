@@ -238,8 +238,8 @@ export interface OAuthTokenResponse {
  * OAuth client instance returned by createOAuthClient
  */
 export interface OAuthClient {
-    /** Initiate OAuth login flow by redirecting to auth service */
-    initiateLogin: (options?: OAuthLoginOptions) => void;
+    /** Initiate OAuth login flow by redirecting to auth service (async for PKCE) */
+    initiateLogin: (options?: OAuthLoginOptions) => Promise<void>;
     /** Validate state parameter from callback */
     validateState: (state: string) => boolean;
     /** Exchange authorization code for tokens */
