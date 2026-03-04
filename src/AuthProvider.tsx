@@ -112,20 +112,29 @@ export interface AuthProviderProps {
 /**
  * Create an auth API client for the given config.
  */
-function createAuthApi(config: AuthConfig) {
+function createAuthApi(config: AuthConfig, tokenManager?: TokenManagerInstance) {
   const baseUrl = config.authServiceUrl;
 
   async function request<T>(
     path: string,
     options: RequestInit = {}
   ): Promise<T> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string>),
+    };
+
+    // Include Bearer token so /auth/me works even when the session
+    // cookie has expired (token refresh doesn't recreate the session).
+    const token = tokenManager?.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${baseUrl}${path}`, {
       ...options,
       credentials: 'include', // Send cookies
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {
@@ -243,8 +252,8 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
     });
   }, [config]);
 
-  // Auth API
-  const authApi = useMemo(() => createAuthApi(config), [config]);
+  // Auth API — pass tokenManager so requests include Bearer token
+  const authApi = useMemo(() => createAuthApi(config, tokenManager), [config, tokenManager]);
 
   // Helper: Fetch user from BFF backend
   const refreshUserFromBFF = useCallback(async (): Promise<User | null> => {
